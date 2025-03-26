@@ -1,31 +1,22 @@
-name: Deploy to Vercel
-
+name: Vercel Production Deployment
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 on:
   push:
     branches:
-      - main  # Ya jo bhi aapki default branch ho (e.g. master)
-
+      - main
 jobs:
-  deploy:
+  Deploy-Production:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2  # Code ko checkout karein
+      - uses: actions/checkout@v2
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Build Project Artifacts
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+      - name: Deploy Project Artifacts to Vercel
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'  # Apne project ke node version ko specify karein
-
-      - name: Install dependencies
-        run: npm install  # React project ke dependencies ko install karein
-
-      - name: Build React app
-        run: npm run build  # React app ko build karein (default React app ke liye `npm run build` command use hota hai)
-
-      - name: Deploy to Vercel
-        run: |
-          curl -s https://vercel.com/download -o vercel-cli.tar.gz  # Vercel CLI ko download karein
-          tar -xzf vercel-cli.tar.gz  # Vercel CLI ko extract karein
-          mv vercel /usr/local/bin/  # Vercel CLI ko local machine par install karein
-          vercel --token ${{ secrets.VERCEL_TOKEN }} --prod  # Vercel token ko GitHub Secrets mein store karein
