@@ -1,0 +1,31 @@
+name: Deploy to Vercel
+
+on:
+  push:
+    branches:
+      - main  # Ya jo bhi aapki default branch ho (e.g. master)
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2  # Code ko checkout karein
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'  # Apne project ke node version ko specify karein
+
+      - name: Install dependencies
+        run: npm install  # React project ke dependencies ko install karein
+
+      - name: Build React app
+        run: npm run build  # React app ko build karein (default React app ke liye `npm run build` command use hota hai)
+
+      - name: Deploy to Vercel
+        run: |
+          curl -s https://vercel.com/download -o vercel-cli.tar.gz  # Vercel CLI ko download karein
+          tar -xzf vercel-cli.tar.gz  # Vercel CLI ko extract karein
+          mv vercel /usr/local/bin/  # Vercel CLI ko local machine par install karein
+          vercel --token ${{ secrets.VERCEL_TOKEN }} --prod  # Vercel token ko GitHub Secrets mein store karein
